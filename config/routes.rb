@@ -1,5 +1,6 @@
 Rails.application.routes.draw do
   mount StripeEvent::Engine, at: '/webhooks/stripe'
+ #Controller to tell device we are using.
   devise_for :accounts, controllers: { registrations: "registrations" }
 
   get "/plans" => "public#plans"

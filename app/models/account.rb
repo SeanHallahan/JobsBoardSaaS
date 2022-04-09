@@ -23,6 +23,7 @@ class Account < ApplicationRecord
       100
     end
 
+    #Symbols with assigned values to the right.
     stripe_params = {
       :name => self.full_name,
       :description => "Customer id: #{self.id}",
@@ -31,17 +32,19 @@ class Account < ApplicationRecord
     }
 
     if plan.stripe_customer_id.present?
-      # load stripe subscription and update customer plan
+      # load stripe subscription and update customer plan through API call.
       account = Stripe::Customer.retrieve(plan.stripe_customer_id)
     else
       # if no stripe customer id is found on subscription, then create new stripe subscription
       account = Stripe::Customer.create(stripe_params)
     end
 
-    # create / update subscription
+    # create / update subscription - if user is already subscribed stop if not continue
+    # |
+    # -> stripe_subscription_id used to determine this.
     if plan.stripe_subscription_id.present?
       subscription = Stripe::Subscription.update(plan.stripe_subscription_id, items: [
-        ['plan' => "Premium", "quantity" => qty]      
+        ['plan' => "Premium", "quantity" => qty]
       ])
     else
       subscription = Stripe::Subscription.create(customer: plan.stripe_customer_id, items: [
@@ -54,7 +57,7 @@ class Account < ApplicationRecord
   end
 
   private
-
+#User automatically gets free tier account untill changed.
   def setup_subscription
     Subscription.create(account_id: self.id, plan: "free", active_until: 1.month.from_now)
   end

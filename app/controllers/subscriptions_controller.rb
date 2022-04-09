@@ -2,6 +2,7 @@ class SubscriptionsController
 
   def choose_plan
     plan = params[:plan]
+#User selects plan
     qty = case plan
     when 'small'
       3
@@ -31,6 +32,7 @@ class SubscriptionsController
     @subscription = current_account.subscription
     if @subscription.present? && @subscription.update(plan: plan)
       # plan updated successfully
+      # Using the stripe gem to create a subscription.
       current_account.setup_stripe_subscription
     else
       # plan was not updated
